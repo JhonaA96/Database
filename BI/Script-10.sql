@@ -22,7 +22,7 @@ SELECT
 	--FORMAT(SUM(sod.OrderQty) * p.StandardCost, 'C', 'En-us') AS Total_Cost,
 	--FORMAT(SUM(sod.LineTotal) / SUM(sod.OrderQty), 'C', 'En-us') AS unit_price,
 	--FORMAT(SUM(sod.LineTotal), 'C', 'En-us') as total_selled,
-	(SUM(sod.LineTotal) - (SUM(sod.OrderQty) * p.StandardCost)) / SUM(sod.LineTotal) as Profit_Margin
+ 	(SUM(sod.LineTotal) - (SUM(sod.OrderQty) * p.StandardCost)) / SUM(sod.LineTotal) as Profit_Margin
 FROM Sales.SalesOrderDetail sod
 INNER JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID
 INNER JOIN Production.Product p ON sod.ProductID  = p.ProductID
@@ -43,11 +43,29 @@ WHERE YEAR(soh.OrderDate) = 2014
 AND DATEPART(qq, soh.OrderDate) = 2
 GROUP BY pc.Name, soh.OrderDate;
 
---4. Un query que permita calcular el tiempo promedio de envío por categoría de productos en el último trimestre, incluyendo información sobre clientes, empleados y proveedores.
+--4. Un query que permita calcular el tiempo promedio de envío por categoría de productos en el último trimestre, 
+-- incluyendo información sobre clientes, empleados y proveedores.
+
+SELECT 
+	pc.Name as Category_Name,
+	CONCAT(p2.FirstName, ' ', p2.LastName) AS Name, 
+	AVG(DATEDIFF(day, soh.OrderDate, soh.ShipDate)) AS Averager_Days
+FROM Sales.SalesOrderDetail sod
+INNER JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID
+INNER JOIN Production.Product p ON sod.ProductID = p.ProductID
+INNER JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID
+INNER JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID
+INNER JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+INNER JOIN Person.Person p2 ON c.PersonID = p2.BusinessEntityID
+WHERE YEAR(soh.OrderDate) = 2014
+AND DATEPART(qq, soh.OrderDate) = 2
+GROUP BY pc.Name, p2.FirstName, p2.LastName, soh.OrderDate;
+
+--5. Un query que permita analizar el desempeño de los productos en función de las revisiones de los clientes, 
+--mostrando información sobre empleados y clientes asociados a las revisiones
 
 
 
---5. Un query que permita analizar el desempeño de los productos en función de las revisiones de los clientes, mostrando información sobre empleados y clientes asociados a las revisiones
 --6. Un query que permita identificar los productos más devueltos en el último mes, incluyendo información sobre los clientes y empleados asociados a las devoluciones
 --7. Un query que permita analizar la distribución de ventas por canal de marketing en el último semestre
 --8. Un query que permita identificar los clientes con mayor valor de compras en el último trimestre, mostrando información sobre empleados y productos asociados a las ventas
