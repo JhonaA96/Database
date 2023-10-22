@@ -15,13 +15,6 @@ ORDER BY pc.Name ASC, p.Name ASC, YEAR (sod.ModifiedDate) ASC;
 
 --2. Un query que permita calcular el margen de beneficio de cada producto en el último año:
 
-Quantity_Selled 
-Total_Cost (SUM(sod.OrderQty) * p.StandardCost)
-unit_price 
-total_selled SUM(sod.LineTotal) 
-
-(SUM(sod.LineTotal) - (SUM(sod.OrderQty) * p.StandardCost)) / SUM(sod.LineTotal)
-
 SELECT 
 	p.Name AS Product,
 	--p.StandardCost as Cost,
@@ -51,6 +44,9 @@ AND DATEPART(qq, soh.OrderDate) = 2
 GROUP BY pc.Name, soh.OrderDate;
 
 --4. Un query que permita calcular el tiempo promedio de envío por categoría de productos en el último trimestre, incluyendo información sobre clientes, empleados y proveedores.
+
+
+
 --5. Un query que permita analizar el desempeño de los productos en función de las revisiones de los clientes, mostrando información sobre empleados y clientes asociados a las revisiones
 --6. Un query que permita identificar los productos más devueltos en el último mes, incluyendo información sobre los clientes y empleados asociados a las devoluciones
 --7. Un query que permita analizar la distribución de ventas por canal de marketing en el último semestre
