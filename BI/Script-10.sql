@@ -110,3 +110,21 @@ ORDER BY SUM(sod.LineTotal) DESC;
 
 --9. Un query que permita analizar las tendencias de ventas por región en el último año, 
 --mostrando información sobre empleados, clientes y productos asociados a las ventas
+
+SELECT 
+	st.Name AS Territory,
+	CONCAT(p2.FirstName, ' ', p2.LastName) AS Sales_Person_Name,
+	CONCAT(p.FirstName, ' ', p.LastName) AS Customer_Name,
+	p3.Name AS Product,
+	FORMAT(SUM(sod.LineTotal), 'C', 'En-us') AS Total_Selled 
+FROM Sales.SalesOrderDetail sod
+INNER JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID
+INNER JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+INNER JOIN Sales.SalesPerson sp ON soh.SalesPersonID = sp.BusinessEntityID
+INNER JOIN Person.Person p ON c.PersonID = p.BusinessEntityID
+INNER JOIN Person.Person p2 ON sp.BusinessEntityID = p2.BusinessEntityID
+INNER JOIN Production.Product p3 ON sod.ProductID = p3.ProductID
+INNER JOIN Sales.SalesTerritoryHistory sth ON sp.BusinessEntityID = sth.BusinessEntityID
+INNER JOIN Sales.SalesTerritory st ON sth.TerritoryID = st.TerritoryID
+WHERE YEAR(soh.OrderDate) = 2014
+GROUP BY st.Name, p.FirstName, p.LastName, p2.FirstName, p2.LastName, p3.Name;
