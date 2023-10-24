@@ -48,7 +48,8 @@ GROUP BY pc.Name, soh.OrderDate;
 
 SELECT 
 	pc.Name as Category_Name,
-	CONCAT(p2.FirstName, ' ', p2.LastName) AS Name, 
+	CONCAT(p2.FirstName, ' ', p2.LastName) AS Customer_Name,
+	CONCAT(p3.FirstName, ' ', p3.LastName) AS Sales_Person_Name,
 	AVG(DATEDIFF(day, soh.OrderDate, soh.ShipDate)) AS Averager_Days
 FROM Sales.SalesOrderDetail sod
 INNER JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID
@@ -56,17 +57,56 @@ INNER JOIN Production.Product p ON sod.ProductID = p.ProductID
 INNER JOIN Production.ProductSubcategory ps ON p.ProductSubcategoryID = ps.ProductSubcategoryID
 INNER JOIN Production.ProductCategory pc ON ps.ProductCategoryID = pc.ProductCategoryID
 INNER JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+INNER JOIN Sales.SalesPerson sp ON soh.SalesPersonID = sp.BusinessEntityID
 INNER JOIN Person.Person p2 ON c.PersonID = p2.BusinessEntityID
+INNER JOIN Person.Person p3 ON sp.BusinessEntityID = p3.BusinessEntityID
 WHERE YEAR(soh.OrderDate) = 2014
 AND DATEPART(qq, soh.OrderDate) = 2
-GROUP BY pc.Name, p2.FirstName, p2.LastName, soh.OrderDate;
+GROUP BY pc.Name, p2.FirstName, p2.LastName, p3.FirstName, p3.LastName, soh.OrderDate;
+
+SELECT * FROM 
 
 --5. Un query que permita analizar el desempeño de los productos en función de las revisiones de los clientes, 
 --mostrando información sobre empleados y clientes asociados a las revisiones
 
 
 
---6. Un query que permita identificar los productos más devueltos en el último mes, incluyendo información sobre los clientes y empleados asociados a las devoluciones
+--6. Un query que permita identificar los productos más devueltos en el último mes, 
+--incluyendo información sobre los clientes y empleados asociados a las devoluciones
+
 --7. Un query que permita analizar la distribución de ventas por canal de marketing en el último semestre
---8. Un query que permita identificar los clientes con mayor valor de compras en el último trimestre, mostrando información sobre empleados y productos asociados a las ventas
---9. Un query que permita analizar las tendencias de ventas por región en el último año, mostrando información sobre empleados, clientes y productos asociados a las ventas
+SELECT
+	sr.ReasonType,
+	sr.Name AS Channel,
+	p.Name AS Product,
+	FORMAT(SUM(soh.TotalDue), 'C', 'En-us')
+FROM Sales.SalesOrderHeaderSalesReason sohsr
+INNER JOIN Sales.SalesReason sr ON sohsr.SalesReasonID = sr.SalesReasonID
+INNER JOIN Sales.SalesOrderHeader soh ON sohsr.SalesOrderID = soh.SalesOrderID
+INNER JOIN Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
+INNER JOIN Production.Product p ON sod.ProductID = p.ProductID
+WHERE sr.ReasonType = 'Marketing'
+GROUP BY sr.ReasonType, sr.Name, p.Name ;
+
+--8. Un query que permita identificar los clientes con mayor valor de compras en el último 
+--trimestre, mostrando información sobre empleados y productos asociados a las ventas
+
+SELECT 
+	CONCAT(p.FirstName, ' ', p.LastName) AS Customer_Name,
+	CONCAT(p2.FirstName, ' ', p2.LastName) AS Sales_Person_Name,
+	p3.Name AS Product,
+	FORMAT(SUM(sod.LineTotal), 'C', 'En-us') AS Total_Selled 
+FROM Sales.SalesOrderDetail sod
+INNER JOIN Sales.SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID
+INNER JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+INNER JOIN Sales.SalesPerson sp ON soh.SalesPersonID = sp.BusinessEntityID
+INNER JOIN Person.Person p ON c.PersonID = p.BusinessEntityID
+INNER JOIN Person.Person p2 ON sp.BusinessEntityID = p2.BusinessEntityID
+INNER JOIN Production.Product p3 ON sod.ProductID = p3.ProductID
+WHERE YEAR(soh.OrderDate) = 2014
+AND DATEPART(qq, soh.OrderDate) = 2
+GROUP BY p.FirstName, p.LastName, p2.FirstName, p2.LastName, p3.Name
+ORDER BY SUM(sod.LineTotal) DESC;
+
+--9. Un query que permita analizar las tendencias de ventas por región en el último año, 
+--mostrando información sobre empleados, clientes y productos asociados a las ventas
