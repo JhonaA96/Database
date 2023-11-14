@@ -130,3 +130,30 @@ INNER JOIN Sales.SalesTerritoryHistory sth ON sp.BusinessEntityID = sth.Business
 INNER JOIN Sales.SalesTerritory st ON sth.TerritoryID = st.TerritoryID
 WHERE YEAR(soh.OrderDate) = 2014
 GROUP BY st.Name, p.FirstName, p.LastName, p2.FirstName, p2.LastName, p3.Name;
+
+
+------------------------------- PROCEDIMIENTOS ALMACENADOS -------------------------------
+CREATE OR ALTER FUNCTION dbo.GenerarCorreo(
+	@nombre NVARCHAR(50),
+	@apellido NVARCHAR(50),
+	@codigo INT
+)
+RETURNS NVARCHAR(100)
+AS
+BEGIN
+	DECLARE @correo NVARCHAR(100);
+	SET @correo = LOWER(LEFT(@nombre, 1) + @apellido + RIGHT (CONVERT(NVARCHAR, @codigo), 2) + '@adventureworks.com');
+	RETURN @correo;
+END;
+
+DECLARE @nombre NVARCHAR(50) = 'Jhonatan';
+DECLARE @apellido NVARCHAR(50) = 'acuna';
+DECLARE @codigo INT = 67000261;
+DECLARE @correo NVARCHAR(100);
+
+SET @correo = dbo.GenerarCorreo(@nombre, @apellido, @codigo);
+
+PRINT 'CORREO GENERADO ' + @correo;
+
+
+
