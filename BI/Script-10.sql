@@ -133,6 +133,7 @@ GROUP BY st.Name, p.FirstName, p.LastName, p2.FirstName, p2.LastName, p3.Name;
 
 
 ------------------------------- PROCEDIMIENTOS ALMACENADOS -------------------------------
+-- Generador correo --
 CREATE OR ALTER FUNCTION dbo.GenerarCorreo(
 	@nombre NVARCHAR(50),
 	@apellido NVARCHAR(50),
@@ -155,5 +156,26 @@ SET @correo = dbo.GenerarCorreo(@nombre, @apellido, @codigo);
 
 PRINT 'CORREO GENERADO ' + @correo;
 
+-- Tiempo transcurrido desde la última compra --
+CREATE OR ALTER FUNCTION dbo.CalcularTiempoTranscurrido(@CustomerId INT)
+RETURNS NVARCHAR(100)
+AS
+BEGIN
+    DECLARE @TiempoTranscurrido NVARCHAR(100);
 
+    SELECT @TiempoTranscurrido = 
+        CONVERT(NVARCHAR(10), DATEDIFF(YEAR, MAX(soh.OrderDate), GETDATE())) + ' años ' +
+        CONVERT(NVARCHAR(10), DATEDIFF(MONTH, MAX(soh.OrderDate), GETDATE()) % 12) + ' meses ' +
+        CONVERT(NVARCHAR(10), DATEDIFF(DAY, MAX(soh.OrderDate), GETDATE()) % 30) + ' días'
+    FROM Sales.SalesOrderHeader soh
+    WHERE soh.CustomerID = @CustomerId;
 
+    RETURN @TiempoTranscurrido;
+END;
+
+DECLARE @CustomerId INT = 29825;
+DECLARE @Resultado NVARCHAR(100);
+
+SET @Resultado = dbo.CalcularTiempoTranscurrido(@CustomerId);
+
+PRINT 'Tiempo transcurrido desde la última compra: ' + @Resultado;
