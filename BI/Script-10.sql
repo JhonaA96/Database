@@ -64,17 +64,19 @@ WHERE YEAR(soh.OrderDate) = 2014
 AND DATEPART(qq, soh.OrderDate) = 2
 GROUP BY pc.Name, p2.FirstName, p2.LastName, p3.FirstName, p3.LastName, soh.OrderDate;
 
-SELECT * FROM 
 
 --5. Un query que permita analizar el desempeño de los productos en función de las revisiones de los clientes, 
 --mostrando información sobre empleados y clientes asociados a las revisiones
 
-
+SELECT * FROM Production.ProductReview pr;
 
 --6. Un query que permita identificar los productos más devueltos en el último mes, 
 --incluyendo información sobre los clientes y empleados asociados a las devoluciones
 
+
+
 --7. Un query que permita analizar la distribución de ventas por canal de marketing en el último semestre
+
 SELECT
 	sr.ReasonType,
 	sr.Name AS Channel,
