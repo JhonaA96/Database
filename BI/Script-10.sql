@@ -132,7 +132,7 @@ WHERE YEAR(soh.OrderDate) = 2014
 GROUP BY st.Name, p.FirstName, p.LastName, p2.FirstName, p2.LastName, p3.Name;
 
 
-------------------------------- PROCEDIMIENTOS ALMACENADOS -------------------------------
+------------------------------- FUNCIONES -------------------------------
 -- Generador correo --
 CREATE OR ALTER FUNCTION dbo.GenerarCorreo(
 	@nombre NVARCHAR(50),
@@ -147,9 +147,9 @@ BEGIN
 	RETURN @correo;
 END;
 
-DECLARE @nombre NVARCHAR(50) = 'Jhonatan';
-DECLARE @apellido NVARCHAR(50) = 'acuna';
-DECLARE @codigo INT = 67000261;
+DECLARE @nombre NVARCHAR(50) = (SELECT p.FirstName FROM Person.Person p WHERE p.BusinessEntityID = 20776);
+DECLARE @apellido NVARCHAR(50) = (SELECT p.LastName FROM Person.Person p WHERE p.BusinessEntityID = 20776);
+DECLARE @codigo INT = (SELECT p.BusinessEntityID FROM Person.Person p WHERE p.BusinessEntityID = 20776);
 DECLARE @correo NVARCHAR(100);
 
 SET @correo = dbo.GenerarCorreo(@nombre, @apellido, @codigo);
@@ -173,9 +173,40 @@ BEGIN
     RETURN @TiempoTranscurrido;
 END;
 
-DECLARE @CustomerId INT = 29825;
+DECLARE @CustomerId INT = 20776;
 DECLARE @Resultado NVARCHAR(100);
 
 SET @Resultado = dbo.CalcularTiempoTranscurrido(@CustomerId);
 
 PRINT 'Tiempo transcurrido desde la última compra: ' + @Resultado;
+
+
+------------------------------- PROCEDIMIENTOS ALMACENADOS -------------------------------
+CREATE OR ALTER PROCEDURE dbo.ActualizarCorreoElectronico
+    @nombre NVARCHAR(50),
+    @apellido NVARCHAR(50),
+    @codigo INT,
+    @CustomerId INT
+AS
+BEGIN
+    DECLARE @correo NVARCHAR(100);
+
+    SET @correo = dbo.GenerarCorreo(@nombre, @apellido, @codigo);
+
+    UPDATE Person.Person
+    SET email = @correo
+    WHERE BusinessEntityID = @CustomerId;
+   	PRINT 'CORREO ACTUALIZADO ' + @correo +' para el ID ' + @CustomerId;
+END;
+
+ALTER TABLE Person.Person ADD email NVARCHAR(100);
+
+DECLARE @CustomerId INT = 20776;
+DECLARE @nombre NVARCHAR(50) = (SELECT p.FirstName FROM Person.Person p WHERE p.BusinessEntityID = @CustomerId);
+DECLARE @apellido NVARCHAR(50) = (SELECT p.LastName FROM Person.Person p WHERE p.BusinessEntityID = @CustomerId);
+DECLARE @codigo INT = (SELECT p.BusinessEntityID FROM Person.Person p WHERE p.BusinessEntityID = @CustomerId);
+
+EXEC dbo.ActualizarCorreoElectronico @nombre, @apellido, @codigo, @CustomerId;
+
+SELECT * FROM Person.Person p WHERE BusinessEntityID = 20776;
+
